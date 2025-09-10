@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://cggydgqeq7d4t"]
 
 [ext_resource type="Script" uid="uid://c3h8dii2my10o" path="res://scripts/Player.gd" id="1_4x8bk"]
-[ext_resource type="Script" path="res://scripts/StickFigureSprite.gd" id="2_stick"]
+[ext_resource type="Script" path="res://scripts/PixelCharacterSprite.gd" id="2_pixel"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1q2kv"]
 size = Vector2(20, 40)
@@ -14,5 +14,5 @@ script = ExtResource("1_4x8bk")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_1q2kv")
 
-[node name="StickFigureSprite" type="Node2D" parent="."]
-script = ExtResource("2_stick")
+[node name="PixelCharacterSprite" type="Node2D" parent="."]
+script = ExtResource("2_pixel")

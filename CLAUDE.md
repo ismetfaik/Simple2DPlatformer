@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a simple 2D platformer game built with Godot 4.4. The player controls a sleek silhouette character that can jump between platforms in a rectangular play area to earn points.
+This is a simple 2D platformer game built with Godot 4.4. The player controls a highly detailed pixel art character with advanced animations that can jump between platforms in a rectangular play area to earn points.
 
 ## Running the Game
 
@@ -27,12 +27,14 @@ This is a simple 2D platformer game built with Godot 4.4. The player controls a 
 - Implements coyote time and jump buffering for responsive controls
 - Emits `platform_reached(platform_name)` and `ground_touched` signals
 - Key constants: SPEED=200, JUMP_VELOCITY=-400, GRAVITY=980
-- **Animation System**: Uses custom `SilhouetteSprite` with state-based animations
-  - States: IDLE, WALK, JUMP_START, JUMP_AIR, JUMP_LAND
-  - Modern silhouette design with gradient colors and smooth edges
-  - Dynamic poses with dramatic jump sequences and balance recovery
+- **Animation System**: Uses custom `EnhancedPixelCharacterSprite` with advanced state-based animations
+  - States: IDLE, IDLE_BLINK, WALK, RUN, CROUCH, CROUCH_WALK, JUMP_START, JUMP_AIR, JUMP_FALL, JUMP_LAND, WALL_SLIDE
+  - High-resolution pixel art (16x40 pixels at 2x scale) with detailed shading and highlights
+  - 8-frame walking cycle and 6-frame running cycle for smooth movement
+  - Advanced features: automatic blinking, breathing animation, speed-based walk/run transitions
+  - Enhanced color palette with skin tones, hair highlights, clothing shadows
   - Directional sprite flipping for left/right movement
-  - Physics-driven animation transitions with fluid motion
+  - Physics-driven animation transitions with context-sensitive state changes
 
 **Platform Detection**
 - Each platform has both StaticBody2D for collision and Area2D for detection
@@ -54,7 +56,7 @@ Ground Contact → Player.ground_touched signal → Main._on_ground_touched() �
 ### Scene Structure
 
 - `Main.tscn`: Main game scene with boundaries, platforms, player, and UI
-- `Player.tscn`: Character with collision and modern silhouette sprite
+- `Player.tscn`: Character with collision and enhanced detailed pixel art sprite
 - `Platform.tscn`: Platform with collision body and detection area
 - UI implemented as CanvasLayer with score display in bottom-left
 
@@ -64,7 +66,9 @@ Ground Contact → Player.ground_touched signal → Main._on_ground_touched() �
 - Boundaries are created programmatically in Main.gd setup_boundaries()
 - Platform heights adjusted to be reachable with current jump physics
 - Ground detection uses both Y-position check and GroundPlatform contact
-- **Character Rendering**: `SilhouetteSprite.gd` uses Godot's `_draw()` for vector-based silhouette graphics
-- Smooth polygon shapes with gradient colors and subtle outlines for definition
-- Dynamic poses with extended limbs and dramatic movement expressions
-- Animation timing controlled by Player.gd update_animation() at lines 71-121
+- **Character Rendering**: `EnhancedPixelCharacterSprite.gd` uses Godot's `_draw()` for detailed pixel art
+- High-resolution character with advanced shading, highlights, and anatomical details
+- Enhanced color palette: skin/shadow, hair/highlights, clothing with depth, detailed eyes/mouth
+- Separate animation timers for different states (walk: 8 frames, run: 6 frames, idle: breathing)
+- Advanced features: random blinking, contextual pose variations, speed-based animation selection
+- Animation timing controlled by Player.gd update_animation() at lines 76-150

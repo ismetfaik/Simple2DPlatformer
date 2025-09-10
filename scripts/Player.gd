@@ -13,14 +13,21 @@ var jump_buffer_time = 0.1
 var jump_buffer_timer = 0.0
 var was_on_ground = false
 
+# Animation variables
+var stick_figure_sprite
+var jump_start_timer = 0.0
+var jump_land_timer = 0.0
+var was_jumping = false
+
 func _ready():
-	pass
+	stick_figure_sprite = $StickFigureSprite
 
 func _physics_process(delta):
 	handle_gravity(delta)
 	handle_input()
 	handle_movement()
 	move_and_slide()
+	update_animation(delta)
 
 func handle_gravity(delta):
 	if not is_on_floor():
@@ -60,3 +67,55 @@ func on_platform_reached(platform_name):
 		ground_touched.emit()
 	else:
 		platform_reached.emit(platform_name)
+
+func update_animation(delta):
+	var StickFigureSprite = preload("res://scripts/StickFigureSprite.gd")
+	
+	# Handle jump start timing
+	if jump_start_timer > 0:
+		jump_start_timer -= delta
+		if jump_start_timer <= 0:
+			stick_figure_sprite.set_animation_state(StickFigureSprite.AnimationState.JUMP_AIR)
+	
+	# Handle jump land timing
+	if jump_land_timer > 0:
+		jump_land_timer -= delta
+		if jump_land_timer <= 0:
+			# Return to appropriate animation based on movement
+			var direction = Input.get_axis("move_left", "move_right")
+			if abs(direction) > 0.1:
+				stick_figure_sprite.set_animation_state(StickFigureSprite.AnimationState.WALK)
+			else:
+				stick_figure_sprite.set_animation_state(StickFigureSprite.AnimationState.IDLE)
+	
+	# Skip animation updates if in timed states
+	if jump_start_timer > 0 or jump_land_timer > 0:
+		return
+	
+	# Determine animation state based on physics
+	var direction = Input.get_axis("move_left", "move_right")
+	var is_jumping = velocity.y < -50  # Moving up significantly
+	var is_falling = velocity.y > 50   # Moving down significantly
+	var just_landed = is_on_floor() and was_jumping and velocity.y >= 0
+	
+	if just_landed:
+		# Start landing animation
+		stick_figure_sprite.set_animation_state(StickFigureSprite.AnimationState.JUMP_LAND)
+		jump_land_timer = 0.2  # Show landing for 0.2 seconds
+		was_jumping = false
+	elif is_jumping or is_falling:
+		if not was_jumping:
+			# Start jump with brief jump_start animation
+			stick_figure_sprite.set_animation_state(StickFigureSprite.AnimationState.JUMP_START)
+			jump_start_timer = 0.1  # Show jump start for 0.1 seconds
+			was_jumping = true
+	elif is_on_floor():
+		was_jumping = false
+		if abs(direction) > 0.1:
+			stick_figure_sprite.set_animation_state(StickFigureSprite.AnimationState.WALK)
+		else:
+			stick_figure_sprite.set_animation_state(StickFigureSprite.AnimationState.IDLE)
+	
+	# Handle sprite flipping for direction
+	if abs(direction) > 0.1:
+		stick_figure_sprite.scale.x = 1 if direction > 0 else -1

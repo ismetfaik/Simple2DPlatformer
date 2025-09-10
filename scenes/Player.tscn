@@ -1,6 +1,7 @@
-[gd_scene load_steps=3 format=3 uid="uid://cggydgqeq7d4t"]
+[gd_scene load_steps=4 format=3 uid="uid://cggydgqeq7d4t"]
 
 [ext_resource type="Script" uid="uid://c3h8dii2my10o" path="res://scripts/Player.gd" id="1_4x8bk"]
+[ext_resource type="Script" path="res://scripts/StickFigureSprite.gd" id="2_stick"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1q2kv"]
 size = Vector2(20, 40)
@@ -13,14 +14,5 @@ script = ExtResource("1_4x8bk")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_1q2kv")
 
-[node name="Sprite2D" type="ColorRect" parent="."]
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -10.0
-offset_top = -20.0
-offset_right = 10.0
-offset_bottom = 20.0
-color = Color(0.2, 0.6, 1, 1)
+[node name="StickFigureSprite" type="Node2D" parent="."]
+script = ExtResource("2_stick")

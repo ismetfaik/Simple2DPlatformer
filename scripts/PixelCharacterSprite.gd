@@ -192,10 +192,21 @@ func draw_jump_air(pixel_size: int):
 		for y in range(-6, 4):
 			draw_pixel(Vector2(x, y), shirt_color, pixel_size)
 	
-	# Arms (up)
-	for y in range(-8, -4):
-		draw_pixel(Vector2(-3, y), skin_color, pixel_size)
-		draw_pixel(Vector2(3, y), skin_color, pixel_size)
+	# Left arm (connected, angled up from shoulder)
+	draw_pixel(Vector2(-2, -5), skin_color, pixel_size)  # Shoulder connection
+	draw_pixel(Vector2(-3, -6), skin_color, pixel_size)  # Upper arm
+	draw_pixel(Vector2(-4, -7), skin_color, pixel_size)  # Upper arm
+	draw_pixel(Vector2(-4, -8), skin_color, pixel_size)  # Elbow
+	draw_pixel(Vector2(-5, -9), skin_color, pixel_size)  # Forearm
+	draw_pixel(Vector2(-5, -10), skin_color, pixel_size) # Hand
+	
+	# Right arm (connected, angled up from shoulder)
+	draw_pixel(Vector2(2, -5), skin_color, pixel_size)   # Shoulder connection
+	draw_pixel(Vector2(3, -6), skin_color, pixel_size)   # Upper arm
+	draw_pixel(Vector2(4, -7), skin_color, pixel_size)   # Upper arm
+	draw_pixel(Vector2(4, -8), skin_color, pixel_size)   # Elbow
+	draw_pixel(Vector2(5, -9), skin_color, pixel_size)   # Forearm
+	draw_pixel(Vector2(5, -10), skin_color, pixel_size)  # Hand
 	
 	# Legs (bent up)
 	draw_pixel(Vector2(-1, 4), pants_color, pixel_size)

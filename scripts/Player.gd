@@ -14,7 +14,7 @@ var jump_buffer_timer = 0.0
 var was_on_ground = false
 
 # Animation variables
-var enhanced_pixel_sprite
+var pixel_character_sprite
 var jump_start_timer = 0.0
 var jump_land_timer = 0.0
 var jump_fall_timer = 0.0
@@ -22,7 +22,7 @@ var was_jumping = false
 var is_crouching = false
 
 func _ready():
-	enhanced_pixel_sprite = $EnhancedPixelCharacterSprite
+	pixel_character_sprite = $PixelCharacterSprite
 
 func _physics_process(delta):
 	handle_gravity(delta)
@@ -74,19 +74,19 @@ func on_platform_reached(platform_name):
 		platform_reached.emit(platform_name)
 
 func update_animation(delta):
-	var EnhancedPixelCharacterSprite = preload("res://scripts/EnhancedPixelCharacterSprite.gd")
+	var PixelCharacterSprite = preload("res://scripts/PixelCharacterSprite.gd")
 	
 	# Handle timed animation states
 	if jump_start_timer > 0:
 		jump_start_timer -= delta
 		if jump_start_timer <= 0:
-			enhanced_pixel_sprite.set_animation_state(EnhancedPixelCharacterSprite.AnimationState.JUMP_AIR)
+			pixel_character_sprite.set_animation_state(PixelCharacterSprite.AnimationState.JUMP_AIR)
 			jump_fall_timer = 0.3  # Time before switching to fall animation
 	
 	if jump_fall_timer > 0:
 		jump_fall_timer -= delta
 		if jump_fall_timer <= 0 and velocity.y > 0:  # Only switch to fall if actually falling
-			enhanced_pixel_sprite.set_animation_state(EnhancedPixelCharacterSprite.AnimationState.JUMP_FALL)
+			pixel_character_sprite.set_animation_state(PixelCharacterSprite.AnimationState.JUMP_AIR)  # No fall state in original
 	
 	if jump_land_timer > 0:
 		jump_land_timer -= delta
@@ -107,20 +107,19 @@ func update_animation(delta):
 	
 	if just_landed:
 		# Start landing animation
-		enhanced_pixel_sprite.set_animation_state(EnhancedPixelCharacterSprite.AnimationState.JUMP_LAND)
+		pixel_character_sprite.set_animation_state(PixelCharacterSprite.AnimationState.JUMP_LAND)
 		jump_land_timer = 0.25  # Landing recovery time
 		was_jumping = false
 		jump_fall_timer = 0.0
 	elif is_jumping:
 		if not was_jumping:
 			# Start jump sequence
-			enhanced_pixel_sprite.set_animation_state(EnhancedPixelCharacterSprite.AnimationState.JUMP_START)
+			pixel_character_sprite.set_animation_state(PixelCharacterSprite.AnimationState.JUMP_START)
 			jump_start_timer = 0.1  # Brief crouch before jump
 			was_jumping = true
 	elif is_falling and was_jumping:
-		# Continue with fall animation if not already set
-		if jump_fall_timer <= 0:
-			enhanced_pixel_sprite.set_animation_state(EnhancedPixelCharacterSprite.AnimationState.JUMP_FALL)
+		# Continue with air animation
+		pixel_character_sprite.set_animation_state(PixelCharacterSprite.AnimationState.JUMP_AIR)
 	elif is_on_floor():
 		was_jumping = false
 		jump_fall_timer = 0.0
@@ -128,23 +127,14 @@ func update_animation(delta):
 	
 	# Handle sprite flipping for direction
 	if abs(direction) > 0.1:
-		enhanced_pixel_sprite.scale.x = 1 if direction > 0 else -1
+		pixel_character_sprite.scale.x = 1 if direction > 0 else -1
 
 func determine_ground_animation():
-	var EnhancedPixelCharacterSprite = preload("res://scripts/EnhancedPixelCharacterSprite.gd")
+	var PixelCharacterSprite = preload("res://scripts/PixelCharacterSprite.gd")
 	var direction = Input.get_axis("move_left", "move_right")
 	var movement_speed = abs(velocity.x)
 	
-	if is_crouching:
-		if abs(direction) > 0.1:
-			enhanced_pixel_sprite.set_animation_state(EnhancedPixelCharacterSprite.AnimationState.CROUCH_WALK)
-		else:
-			enhanced_pixel_sprite.set_animation_state(EnhancedPixelCharacterSprite.AnimationState.CROUCH)
-	elif abs(direction) > 0.1:
-		# Determine walk vs run based on speed
-		if movement_speed > SPEED * 0.8:  # Running at near full speed
-			enhanced_pixel_sprite.set_animation_state(EnhancedPixelCharacterSprite.AnimationState.RUN)
-		else:
-			enhanced_pixel_sprite.set_animation_state(EnhancedPixelCharacterSprite.AnimationState.WALK)
+	if abs(direction) > 0.1:
+		pixel_character_sprite.set_animation_state(PixelCharacterSprite.AnimationState.WALK)
 	else:
-		enhanced_pixel_sprite.set_animation_state(EnhancedPixelCharacterSprite.AnimationState.IDLE)
+		pixel_character_sprite.set_animation_state(PixelCharacterSprite.AnimationState.IDLE)

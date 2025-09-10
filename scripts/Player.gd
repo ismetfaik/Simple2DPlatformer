@@ -14,13 +14,13 @@ var jump_buffer_timer = 0.0
 var was_on_ground = false
 
 # Animation variables
-var pixel_character_sprite
+var silhouette_sprite
 var jump_start_timer = 0.0
 var jump_land_timer = 0.0
 var was_jumping = false
 
 func _ready():
-	pixel_character_sprite = $PixelCharacterSprite
+	silhouette_sprite = $SilhouetteSprite
 
 func _physics_process(delta):
 	handle_gravity(delta)
@@ -69,13 +69,13 @@ func on_platform_reached(platform_name):
 		platform_reached.emit(platform_name)
 
 func update_animation(delta):
-	var PixelCharacterSprite = preload("res://scripts/PixelCharacterSprite.gd")
+	var SilhouetteSprite = preload("res://scripts/SilhouetteSprite.gd")
 	
 	# Handle jump start timing
 	if jump_start_timer > 0:
 		jump_start_timer -= delta
 		if jump_start_timer <= 0:
-			pixel_character_sprite.set_animation_state(PixelCharacterSprite.AnimationState.JUMP_AIR)
+			silhouette_sprite.set_animation_state(SilhouetteSprite.AnimationState.JUMP_AIR)
 	
 	# Handle jump land timing
 	if jump_land_timer > 0:
@@ -84,9 +84,9 @@ func update_animation(delta):
 			# Return to appropriate animation based on movement
 			var direction = Input.get_axis("move_left", "move_right")
 			if abs(direction) > 0.1:
-				pixel_character_sprite.set_animation_state(PixelCharacterSprite.AnimationState.WALK)
+				silhouette_sprite.set_animation_state(SilhouetteSprite.AnimationState.WALK)
 			else:
-				pixel_character_sprite.set_animation_state(PixelCharacterSprite.AnimationState.IDLE)
+				silhouette_sprite.set_animation_state(SilhouetteSprite.AnimationState.IDLE)
 	
 	# Skip animation updates if in timed states
 	if jump_start_timer > 0 or jump_land_timer > 0:
@@ -100,22 +100,22 @@ func update_animation(delta):
 	
 	if just_landed:
 		# Start landing animation
-		pixel_character_sprite.set_animation_state(PixelCharacterSprite.AnimationState.JUMP_LAND)
+		silhouette_sprite.set_animation_state(SilhouetteSprite.AnimationState.JUMP_LAND)
 		jump_land_timer = 0.2  # Show landing for 0.2 seconds
 		was_jumping = false
 	elif is_jumping or is_falling:
 		if not was_jumping:
 			# Start jump with brief jump_start animation
-			pixel_character_sprite.set_animation_state(PixelCharacterSprite.AnimationState.JUMP_START)
+			silhouette_sprite.set_animation_state(SilhouetteSprite.AnimationState.JUMP_START)
 			jump_start_timer = 0.1  # Show jump start for 0.1 seconds
 			was_jumping = true
 	elif is_on_floor():
 		was_jumping = false
 		if abs(direction) > 0.1:
-			pixel_character_sprite.set_animation_state(PixelCharacterSprite.AnimationState.WALK)
+			silhouette_sprite.set_animation_state(SilhouetteSprite.AnimationState.WALK)
 		else:
-			pixel_character_sprite.set_animation_state(PixelCharacterSprite.AnimationState.IDLE)
+			silhouette_sprite.set_animation_state(SilhouetteSprite.AnimationState.IDLE)
 	
 	# Handle sprite flipping for direction
 	if abs(direction) > 0.1:
-		pixel_character_sprite.scale.x = 1 if direction > 0 else -1
+		silhouette_sprite.scale.x = 1 if direction > 0 else -1

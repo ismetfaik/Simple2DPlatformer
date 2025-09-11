@@ -71,3 +71,78 @@ Ground Contact → Player.ground_touched signal → Main._on_ground_touched() �
 - Animation states: idle, walk (4-frame cycle), jump_start, jump_air, jump_land
 - **Fixed Jump Arms**: Arms rotate upward from shoulders using pixel-by-pixel positioning
 - Arms remain connected to body during all animation states
+
+## Multiplayer Implementation (COMPLETED)
+
+### Architecture Implemented
+**Server-Relayed Multiplayer** using Nakama for real-time networking:
+- ✅ Clients control their own player movement for responsiveness
+- ✅ Server relays position/animation data between players
+- ✅ Basic server-side validation for scoring and platform detection
+- ✅ Synchronized scoring across all connected players
+
+### Implemented Components
+
+**NetworkManager (Autoload)**
+- Handles Nakama client connection and authentication
+- Manages socket communication with match creation/joining
+- Sends player state updates (position, animation, direction)
+- Relays platform reached and ground touched events
+- Manages player join/leave events
+
+**MultiplayerPlayer**
+- Extends regular Player with network capabilities
+- Sends state updates only when significant changes occur (20fps)
+- Handles both local player (full physics) and remote player (visual only)
+- Smooth position interpolation for remote players
+- Network event broadcasting for platform interactions
+
+**MultiplayerGameManager**
+- Server-side scoring validation and synchronization
+- Tracks per-player scores and visited platforms
+- Validates platform reaches with position checking
+- Broadcasts score updates to all connected clients
+- Provides leaderboard functionality
+
+**MultiplayerMain Scene**
+- Complete multiplayer-enabled main scene
+- Real-time connection status and player count display
+- Dynamic remote player spawning/cleanup
+- Live leaderboard showing top 3 players
+- Debug controls (Enter to reconnect, Escape to quit)
+
+### How to Use Multiplayer
+
+**Prerequisites:**
+1. Install Nakama Godot 4 client plugin from Asset Library
+2. Run a local Nakama server on localhost:7350 (or update NetworkManager.gd with your server details)
+
+**To Test Multiplayer:**
+1. Open MultiplayerMain.tscn as the main scene
+2. Run the game - it will automatically attempt to connect
+3. Run multiple instances to test with multiple players
+4. Players share the same game world and see each other's movements
+5. Scoring is synchronized - all players see the same scores
+
+**Network Events:**
+- Op Code 1: Player state updates (position/animation)
+- Op Code 2: Platform reached events
+- Op Code 3: Ground touched events
+
+### File Structure (Implemented)
+```
+scenes/
+├── MultiplayerMain.tscn      # ✅ Multiplayer main scene
+├── RemotePlayer.tscn         # ✅ Remote player visualization
+scripts/
+├── NetworkManager.gd         # ✅ Nakama networking controller
+├── MultiplayerGameManager.gd # ✅ Server-synchronized game state
+├── MultiplayerPlayer.gd      # ✅ Network-enabled player controller
+├── MultiplayerMain.gd        # ✅ Multiplayer scene controller
+```
+
+### Future Enhancements (Phase 4)
+- Player names/avatars and visual identification
+- Real-time chat system using Nakama
+- Lobby/matchmaking system
+- Enhanced server-side validation and anti-cheat

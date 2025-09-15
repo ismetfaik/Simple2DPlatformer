@@ -14,8 +14,8 @@ var match_id: String = ""
 var local_player_id: String = ""
 var connected_players: Dictionary = {}
 
-const SERVER_KEY = "defaultkey"
-const HOST = "127.0.0.1"
+const SERVER_KEY = "nakama_godot_demo"
+const HOST = "gameserver.aktuna.us"
 const PORT = 7350
 const SCHEME = "http"
 

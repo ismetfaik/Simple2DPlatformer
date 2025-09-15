@@ -129,7 +129,7 @@ func draw_detailed_head(pixel_size: int, offset_y: int = 0):
 	draw_pixel(Vector2(0, -9 + offset_y), mouth_color, pixel_size)
 	draw_pixel(Vector2(1, -9 + offset_y), mouth_color, pixel_size)
 
-func draw_detailed_torso(pixel_size: int, arm_left_offset: Vector2 = Vector2.ZERO, arm_right_offset: Vector2 = Vector2.ZERO):
+func draw_detailed_torso(pixel_size: int, left_arm_angle: float = 0.0, right_arm_angle: float = 0.0):
 	# Shorter, better proportioned torso with cute pink shirt
 	for x in range(-3, 4):
 		for y in range(-7, 3):  # Reduced from -8,8 to -7,3 (10 pixels vs 16)
@@ -141,50 +141,48 @@ func draw_detailed_torso(pixel_size: int, arm_left_offset: Vector2 = Vector2.ZER
 				else:
 					draw_pixel(Vector2(x, y), shirt_color, pixel_size)
 	
-	# More natural arm positioning with shoulder attachment
+	# Shoulder positions (fixed points)
 	var left_shoulder = Vector2(-3, -6)
 	var right_shoulder = Vector2(3, -6)
 	
-	# Left arm with natural curve
-	var left_arm_positions = [
-		left_shoulder + arm_left_offset,                    # Shoulder
-		Vector2(-3, -5) + arm_left_offset,                 # Upper arm
-		Vector2(-4, -4) + arm_left_offset,                 # Upper arm
-		Vector2(-4, -3) + arm_left_offset,                 # Elbow
-		Vector2(-4, -2) + arm_left_offset,                 # Forearm
-		Vector2(-5, -1) + arm_left_offset,                 # Forearm
-		Vector2(-5, 0) + arm_left_offset                   # Hand
+	# Draw shoulders
+	draw_pixel(left_shoulder, skin_color, pixel_size)
+	draw_pixel(right_shoulder, skin_color, pixel_size)
+	
+	# Left arm - rotating from shoulder
+	draw_rotated_arm(left_shoulder, left_arm_angle, -1, pixel_size)
+	
+	# Right arm - rotating from shoulder  
+	draw_rotated_arm(right_shoulder, right_arm_angle, 1, pixel_size)
+
+func draw_rotated_arm(shoulder_pos: Vector2, angle_radians: float, side: int, pixel_size: int):
+	# Arm segments relative to shoulder
+	var arm_segments = [
+		Vector2(0, 0),      # Shoulder (start point)
+		Vector2(0, 1),      # Upper arm
+		Vector2(-side, 2),  # Upper arm 
+		Vector2(-side, 3),  # Elbow
+		Vector2(-side, 4),  # Forearm
+		Vector2(-side*2, 5), # Forearm
+		Vector2(-side*2, 6)  # Hand
 	]
 	
-	# Right arm with natural curve
-	var right_arm_positions = [
-		right_shoulder + arm_right_offset,                  # Shoulder
-		Vector2(3, -5) + arm_right_offset,                 # Upper arm
-		Vector2(4, -4) + arm_right_offset,                 # Upper arm
-		Vector2(4, -3) + arm_right_offset,                 # Elbow
-		Vector2(4, -2) + arm_right_offset,                 # Forearm
-		Vector2(5, -1) + arm_right_offset,                 # Forearm
-		Vector2(5, 0) + arm_right_offset                   # Hand
-	]
-	
-	# Draw arms with better joint definition
-	for i in range(left_arm_positions.size()):
-		var pos = left_arm_positions[i]
+	# Rotate each segment around the shoulder
+	for i in range(arm_segments.size()):
+		var segment = arm_segments[i]
+		
+		# Rotate the segment
+		var rotated_x = segment.x * cos(angle_radians) - segment.y * sin(angle_radians)
+		var rotated_y = segment.x * sin(angle_radians) + segment.y * cos(angle_radians)
+		var rotated_pos = shoulder_pos + Vector2(rotated_x, rotated_y)
+		
+		# Draw the segment
 		if i >= 5:  # Hand area
-			draw_pixel(pos, skin_shadow, pixel_size)
-		elif i == 3:  # Elbow - slight shadow
-			draw_pixel(pos, skin_shadow, pixel_size)
+			draw_pixel(rotated_pos, skin_shadow, pixel_size)
+		elif i == 3:  # Elbow
+			draw_pixel(rotated_pos, skin_shadow, pixel_size)
 		else:
-			draw_pixel(pos, skin_color, pixel_size)
-	
-	for i in range(right_arm_positions.size()):
-		var pos = right_arm_positions[i]
-		if i >= 5:  # Hand area
-			draw_pixel(pos, skin_shadow, pixel_size)
-		elif i == 3:  # Elbow - slight shadow
-			draw_pixel(pos, skin_shadow, pixel_size)
-		else:
-			draw_pixel(pos, skin_color, pixel_size)
+			draw_pixel(rotated_pos, skin_color, pixel_size)
 
 func draw_detailed_legs(pixel_size: int, left_leg_offset: Vector2 = Vector2.ZERO, right_leg_offset: Vector2 = Vector2.ZERO):
 	# Hip area - connects to shorter torso
@@ -272,17 +270,21 @@ func draw_detailed_legs(pixel_size: int, left_leg_offset: Vector2 = Vector2.ZERO
 			draw_pixel(pos, shoe_color, pixel_size)
 
 func draw_idle(pixel_size: int):
-	# Subtle breathing animation
-	var breath_offset = sin(idle_frame * 0.1) * 0.5
+	# EMERGENCY TEST - Simple red rectangle to see if anything draws
+	for x in range(-10, 11):
+		for y in range(-20, 21):
+			draw_pixel(Vector2(x, y), Color.RED, pixel_size)
 	
-	draw_detailed_head(pixel_size, int(breath_offset))
-	draw_detailed_torso(pixel_size)
-	draw_detailed_legs(pixel_size)
+	# Also try the original system
+	# var breath_offset = sin(idle_frame * 0.1) * 0.5
+	# draw_detailed_head(pixel_size, int(breath_offset))
+	# draw_detailed_torso(pixel_size, 0.0, 0.0)  # Arms at neutral position
+	# draw_detailed_legs(pixel_size)
 
 func draw_idle_blink(pixel_size: int):
 	# Draw base character
 	draw_detailed_head(pixel_size)
-	draw_detailed_torso(pixel_size)
+	draw_detailed_torso(pixel_size, 0.0, 0.0)  # Arms at neutral position
 	draw_detailed_legs(pixel_size)
 	
 	# Draw cute closed eyes (override the open ones)
@@ -305,82 +307,69 @@ func draw_idle_blink(pixel_size: int):
 	draw_pixel(Vector2(3, -10), blush_color, pixel_size)
 
 func draw_walk(pixel_size: int):
-	# 8-frame walking cycle
-	var cycle_progress = walk_frame / 8.0
-	var arm_swing = sin(cycle_progress * PI * 2) * 2
-	var leg_step = sin(cycle_progress * PI * 2) * 3
-	var body_bob = abs(sin(cycle_progress * PI * 2)) * 0.5
-	
-	draw_detailed_head(pixel_size, -int(body_bob))
-	draw_detailed_torso(pixel_size, 
-		Vector2(-arm_swing, 1), 
-		Vector2(arm_swing, 1))
-	draw_detailed_legs(pixel_size, 
-		Vector2(leg_step, 0), 
-		Vector2(-leg_step, 0))
+	# EMERGENCY TEST - Simple red rectangle
+	for x in range(-10, 11):
+		for y in range(-20, 21):
+			draw_pixel(Vector2(x, y), Color.RED, pixel_size)
 
 func draw_run(pixel_size: int):
 	# More dramatic running animation
 	var cycle_progress = run_frame / 6.0
-	var arm_swing = sin(cycle_progress * PI * 2) * 3
+	var arm_swing_angle = sin(cycle_progress * PI * 2) * 0.5  # More dramatic swing
 	var leg_step = sin(cycle_progress * PI * 2) * 4
 	var body_lean = sin(cycle_progress * PI * 2) * 1
 	var body_bob = abs(sin(cycle_progress * PI * 2)) * 1
 	
 	draw_detailed_head(pixel_size, int(body_lean - body_bob))
 	draw_detailed_torso(pixel_size, 
-		Vector2(-arm_swing + body_lean, 2), 
-		Vector2(arm_swing + body_lean, -1))
+		-arm_swing_angle,   # Left arm opposite swing
+		arm_swing_angle)    # Right arm swing
 	draw_detailed_legs(pixel_size, 
 		Vector2(leg_step, 0), 
 		Vector2(-leg_step, 0))
 
 func draw_crouch(pixel_size: int):
-	# Crouched position - head lower
+	# Crouched position - head lower, arms down
 	draw_detailed_head(pixel_size, 5)
-	
-	# Compressed torso but using our new proportions
-	draw_detailed_torso(pixel_size, Vector2(-2, 4), Vector2(2, 4))
-	
-	# Bent legs - much more compressed due to crouching
+	draw_detailed_torso(pixel_size, 0.2, -0.2)  # Arms slightly angled down
 	draw_detailed_legs(pixel_size, Vector2(-3, -8), Vector2(3, -8))
 
 func draw_crouch_walk(pixel_size: int):
 	# Sneaky crouch walking
 	var cycle_progress = walk_frame / 6.0
-	var arm_sway = sin(cycle_progress * PI * 2) * 1
+	var arm_sway_angle = sin(cycle_progress * PI * 2) * 0.2
 	var leg_step = sin(cycle_progress * PI * 2) * 2
 	
 	draw_detailed_head(pixel_size, 5)
 	draw_detailed_torso(pixel_size, 
-		Vector2(-1 - arm_sway, 4), 
-		Vector2(1 + arm_sway, 4))
+		0.2 - arm_sway_angle,   # Left arm sway
+		-0.2 + arm_sway_angle)  # Right arm sway
 	draw_detailed_legs(pixel_size, 
 		Vector2(-2 + leg_step, -8), 
 		Vector2(2 - leg_step, -8))
 
 func draw_jump_start(pixel_size: int):
-	# Pre-jump crouch - arms back for momentum, staying connected to shoulders
+	# Pre-jump crouch - arms back for momentum (45 degrees back)
 	draw_detailed_head(pixel_size, 6)
-	draw_detailed_torso(pixel_size, Vector2(1, 3), Vector2(-1, 3))  # Arms back but connected
+	draw_detailed_torso(pixel_size, PI/4, PI/4)  # Both arms 45° back
 	draw_detailed_legs(pixel_size, Vector2(-4, -10), Vector2(4, -10))
 
 func draw_jump_air(pixel_size: int):
-	# Airborne pose - arms up high for balance and momentum
-	draw_detailed_head(pixel_size)
-	draw_detailed_torso(pixel_size, Vector2(0, -6), Vector2(0, -6))  # Both arms straight up
-	draw_detailed_legs(pixel_size, Vector2(-2, -5), Vector2(2, -5))  # Legs tucked up
+	# EMERGENCY TEST - Simple red rectangle
+	for x in range(-10, 11):
+		for y in range(-20, 21):
+			draw_pixel(Vector2(x, y), Color.RED, pixel_size)
 
 func draw_jump_fall(pixel_size: int):
-	# Falling pose - arms still up but preparing for landing
+	# Falling pose - arms coming down slightly (90 degrees up)
 	draw_detailed_head(pixel_size, 1)
-	draw_detailed_torso(pixel_size, Vector2(-1, -4), Vector2(1, -4))  # Arms up but slightly out
+	draw_detailed_torso(pixel_size, -PI/2, -PI/2)  # Arms straight up (90°)
 	draw_detailed_legs(pixel_size, Vector2(-1, -1), Vector2(1, -1))  # Legs extending for landing
 
 func draw_jump_land(pixel_size: int):
-	# Landing recovery - arms out for balance, staying connected
+	# Landing recovery - arms out horizontally for balance (90 degrees out)
 	draw_detailed_head(pixel_size, 3)
-	draw_detailed_torso(pixel_size, Vector2(-3, 0), Vector2(3, 0))  # Arms out horizontally
+	draw_detailed_torso(pixel_size, -PI/2, PI/2)  # Arms spread horizontally
 	draw_detailed_legs(pixel_size, Vector2(-2, -4), Vector2(2, -4))  # Knees bent for impact
 
 func draw_wall_slide(pixel_size: int):

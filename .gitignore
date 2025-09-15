@@ -1,0 +1,8 @@
+*.swp
+*.import
+.godot/
+*.txt
+nul
+test_suite/addons
+test_suite/addons/*
+test_suite/.import/*

@@ -16,6 +16,12 @@ run/main_scene="res://Main.tscn"
 config/features=PackedStringArray("4.4")
 config/icon="res://icon.svg"
 
+[autoload]
+
+GameManager="*res://scripts/GameManager.gd"
+NetworkManager="*res://scripts/NetworkManager.gd"
+Nakama="*res://addons/com.heroiclabs.nakama/Nakama.gd"
+
 [display]
 
 window/size/viewport_width=1024
@@ -47,11 +53,6 @@ jump={
 
 2d_physics/layer_1="Player"
 2d_physics/layer_2="Platform"
-
-[autoload]
-
-GameManager="*res://scripts/GameManager.gd"
-NetworkManager="*res://scripts/NetworkManager.gd"
 
 [physics]
 
